@@ -20,8 +20,8 @@
         <span v-if="!task.completada">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">completar</button><button @click="eliminarTarea(task)">Eliminar</button></span>
         <span v-else style="text-decoration: line-through;">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">descompletar</button> <button @click="eliminarTarea(task)">Eliminar</button></span>
       </li>
-      
     </ul>
+  <p>Totales: {{ tasks.length }}, Pendientes: {{ taskFiltradas.length }}</p>
   </div>
 </template>
 <script setup>
@@ -74,4 +74,7 @@ const taskFiltradas =computed(() => {
     }
     return tasks.value
 })
+
+const totalTareas = computed(() => tasks.value.length)
+const totalPendientes = computed(() => tasks.value.filter(task => !task.completada).length)
 </script>
