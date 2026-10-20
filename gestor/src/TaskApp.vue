@@ -11,8 +11,12 @@
   </div>
   <div>
     <h2>Lista de tareas</h2>
+    
+    <input type="checkbox" id="pendientes" v-model="mostrarPendientes" />
+    <label for="pendientes">Mostrar solo pendientes</label>
+   
     <ul>
-      <li  v-for="task in tasks" :key="task.id">
+      <li  v-for="task in taskFiltradas" :key="task.id">
         <span v-if="!task.completada">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">completar</button><button @click="eliminarTarea(task)">Eliminar</button></span>
         <span v-else style="text-decoration: line-through;">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">descompletar</button> <button @click="eliminarTarea(task)">Eliminar</button></span>
       </li>
@@ -21,8 +25,8 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
-
+import { ref, computed } from 'vue'
+const mostrarPendientes = ref(false)
 const tasks = ref([
     {
         id: 1,
@@ -64,4 +68,10 @@ const changeStatus = (task) => {
 const eliminarTarea = (task) => {
     tasks.value = tasks.value.filter(t => t.id !== task.id)
 }
+const taskFiltradas =computed(() => {
+   if (mostrarPendientes.value) {
+        return tasks.value.filter(task => !task.completada)
+    }
+    return tasks.value
+})
 </script>
