@@ -1,9 +1,6 @@
 
 <template>
   <h1>Task App</h1>
-  <p>
-   Una simple aplicación de tareas para practicar
-  </p>
   <div>
     <label for="task">Nueva tarea:</label>
     <input v-model="nuevaTarea" type="text" id="task" placeholder="Nueva tarea" />
@@ -21,7 +18,7 @@
         <span v-else style="text-decoration: line-through;">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">descompletar</button> <button @click="eliminarTarea(task)">Eliminar</button></span>
       </li>
     </ul>
-  <p>Totales: {{ tasks.length }}, Pendientes: {{ taskFiltradas.length }}</p>
+  <p>Totales: {{ totalTareas }}, Pendientes: {{ totalPendientes }}</p>
   </div>
 </template>
 <script setup>
@@ -50,11 +47,17 @@ const tasks = ref([
 
 const nuevaTarea = ref('')
 
+const getNextTaskId = () => {
+    return tasks.value.reduce((maxId, task) => Math.max(maxId, task.id), 0) + 1
+}
+
 const agregarTarea = () => {
-    if (nuevaTarea.value.trim() !== '') {
+    const titulo = nuevaTarea.value.trim()
+
+    if (titulo !== '') {
         tasks.value.push({
-            id: tasks.value.length + 1,
-            titulo: nuevaTarea.value,
+            id: getNextTaskId(),
+            titulo,
             dataCreacio: new Date().toISOString().split('T')[0],
             completada: false
         })
