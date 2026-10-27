@@ -1,83 +1,78 @@
-
-<template>
-  <h1>Task App</h1>
-  <div>
-    <label for="task">Nueva tarea:</label>
-    <input v-model="nuevaTarea" type="text" id="task" placeholder="Nueva tarea" />
-    <button @click="agregarTarea">Agregar</button>
-  </div>
-  <div>
-    <h2>Lista de tareas</h2>
-    
-    <input type="checkbox" id="pendientes" v-model="mostrarPendientes" />
-    <label for="pendientes">Mostrar solo pendientes</label>
-   
-    <ul>
-      <li  v-for="task in taskFiltradas" :key="task.id">
-        <span v-if="!task.completada">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">completar</button><button @click="eliminarTarea(task)">Eliminar</button></span>
-        <span v-else style="text-decoration: line-through;">{{ task.titulo }} - {{ task.dataCreacio }} - <button @click="changeStatus(task)">descompletar</button> <button @click="eliminarTarea(task)">Eliminar</button></span>
-      </li>
-    </ul>
-  <p>Totales: {{ totalTareas }}, Pendientes: {{ totalPendientes }}</p>
-  </div>
-</template>
 <script setup>
-import { ref, computed } from 'vue'
-const mostrarPendientes = ref(false)
+import { computed, ref } from 'vue'
+import TaskForm from './TaskForm.vue'
+import TaskList from './TaskList.vue'
+
 const tasks = ref([
-    {
-        id: 1,
-        titulo: 'Aprender Vue.js',
-        dataCreacio: '2024-06-01',
-        completada: false
-    },
-    {
-        id: 2,
-        titulo: 'Practicar con un proyecto',
-        dataCreacio: '2024-06-02',
-        completada: false
-    },
-    {
-        id: 3,
-        titulo: 'Revisar la documentación',
-        dataCreacio: '2024-06-03',
-        completada: true
-    }
+  {
+    id: 1,
+    titulo: 'Aprender Vue.js',
+    dataCreacio: '2024-06-01',
+    completada: false,
+  },
+  {
+    id: 2,
+    titulo: 'Practicar con un proyecto',
+    dataCreacio: '2024-06-02',
+    completada: false,
+  },
+  {
+    id: 3,
+    titulo: 'Revisar la documentación',
+    dataCreacio: '2024-06-03',
+    completada: true,
+  },
 ])
 
-const nuevaTarea = ref('')
+const mostrarPendientes = ref(false)
 
-const getNextTaskId = () => {
-    return tasks.value.reduce((maxId, task) => Math.max(maxId, task.id), 0) + 1
-}
+const taskFiltradas = computed(() => {
+  if (mostrarPendientes.value) {
+    return tasks.value.filter((task) => !task.completada)
+  }
 
-const agregarTarea = () => {
-    const titulo = nuevaTarea.value.trim()
-
-    if (titulo !== '') {
-        tasks.value.push({
-            id: getNextTaskId(),
-            titulo,
-            dataCreacio: new Date().toISOString().split('T')[0],
-            completada: false
-        })
-        nuevaTarea.value = ''
-    }
-}
-
-const changeStatus = (task) => {
-    task.completada = !task.completada
-}
-const eliminarTarea = (task) => {
-    tasks.value = tasks.value.filter(t => t.id !== task.id)
-}
-const taskFiltradas =computed(() => {
-   if (mostrarPendientes.value) {
-        return tasks.value.filter(task => !task.completada)
-    }
-    return tasks.value
+  return tasks.value
 })
 
 const totalTareas = computed(() => tasks.value.length)
-const totalPendientes = computed(() => tasks.value.filter(task => !task.completada).length)
+const totalPendientes = computed(() => tasks.value.filter((task) => !task.completada).length)
+
+const agregarTarea = (nuevaTarea) => {
+  tasks.value.push({
+    id: Date.now(),
+    ...nuevaTarea,
+  })
+}
+
+const changeStatus = (task) => {
+  const tarea = tasks.value.find((item) => item.id === task.id)
+
+  if (tarea) {
+    tarea.completada = !tarea.completada
+  }
+}
+
+const eliminarTarea = (task) => {
+  tasks.value = tasks.value.filter((t) => t.id !== task.id)
+}
 </script>
+
+<template>
+  <div>
+    <h1>Task App</h1>
+    <TaskForm @add-task="agregarTarea" />
+
+    <div>
+      <input type="checkbox" id="pendientes" v-model="mostrarPendientes" />
+      <label for="pendientes">Mostrar solo pendientes</label>
+    </div>
+
+    <TaskList
+      :tasks="taskFiltradas"
+      @toggle-status="changeStatus"
+      @delete-task="eliminarTarea"
+    />
+
+    <p>Totales: {{ totalTareas }}, Pendientes: {{ totalPendientes }}</p>
+  </div>
+</template>
